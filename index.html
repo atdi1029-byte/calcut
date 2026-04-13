@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
+<title>CalCut</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style"
+  content="black-translucent">
+<meta name="theme-color" content="#0d0d0d">
+<link rel="manifest" href="manifest.json">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0d0d0d;
+  --card: #1a1a1a;
+  --border: #2a2a2a;
+  --text: #e8e8e8;
+  --dim: #888;
+  --accent: #ff6b35;
+  --green: #4ecdc4;
+  --yellow: #ffe66d;
+  --red: #ff6b6b;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont,
+    'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 16px 40px;
+}
+
+header {
+  text-align: center;
+  padding: 28px 0 8px;
+}
+header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+header h1 span { color: var(--accent); }
+header p {
+  color: var(--dim);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.input-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 20px;
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+.input-group:last-child { margin-bottom: 0; }
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.weight-display {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.weight-display span {
+  font-size: 20px;
+  color: var(--dim);
+  font-weight: 400;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255,107,53,0.4);
+}
+
+.cardio-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cardio-input input[type="number"] {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 600;
+  padding: 12px 16px;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+}
+.cardio-input input::-webkit-outer-spin-button,
+.cardio-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+.cardio-input input:focus {
+  border-color: var(--accent);
+}
+.cardio-input .unit {
+  color: var(--dim);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.results {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.result-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-card .label {
+  font-size: 14px;
+  color: var(--dim);
+}
+.result-card .sublabel {
+  font-size: 11px;
+  color: var(--dim);
+  opacity: 0.6;
+  margin-top: 2px;
+}
+.result-card .value {
+  font-size: 32px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.result-card .value span {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--dim);
+}
+
+.result-card.maintenance { border-left: 4px solid var(--text); }
+.result-card.maintenance .value { color: var(--text); }
+
+.result-card.mild { border-left: 4px solid var(--green); }
+.result-card.mild .value { color: var(--green); }
+
+.result-card.moderate { border-left: 4px solid var(--yellow); }
+.result-card.moderate .value { color: var(--yellow); }
+
+.result-card.aggressive { border-left: 4px solid var(--red); }
+.result-card.aggressive .value { color: var(--red); }
+
+.loss-rate {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+.result-card.mild .loss-rate {
+  background: rgba(78,205,196,0.15);
+  color: var(--green);
+}
+.result-card.moderate .loss-rate {
+  background: rgba(255,230,109,0.15);
+  color: var(--yellow);
+}
+.result-card.aggressive .loss-rate {
+  background: rgba(255,107,107,0.15);
+  color: var(--red);
+}
+
+.cardio-bonus {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 400px;
+  text-align: center;
+}
+.cardio-bonus .headline {
+  font-size: 14px;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.cardio-bonus .extra {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.cardio-bonus .extra span {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--dim);
+}
+.cardio-bonus .note {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 8px;
+  opacity: 0.7;
+}
+
+.formula {
+  text-align: center;
+  margin: 24px auto;
+  max-width: 400px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.formula code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 14px;
+  color: var(--accent);
+}
+.formula .note {
+  font-size: 11px;
+  color: var(--dim);
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Cal<span>Cut</span></h1>
+  <p>your real maintenance — app can't touch it</p>
+</header>
+
+<div class="input-section">
+  <div class="input-group">
+    <label>Current Weight</label>
+    <div class="weight-display">
+      <span id="weightVal">175</span>
+      <span>lbs</span>
+    </div>
+    <input type="range" id="weightSlider"
+      min="140" max="200" value="175" step="0.5">
+  </div>
+  <div class="input-group">
+    <label>Daily Cardio Burn</label>
+    <div class="cardio-input">
+      <input type="number" id="cardioInput"
+        value="0" min="0" max="2000" step="50"
+        placeholder="0">
+      <span class="unit">cal / day</span>
+    </div>
+  </div>
+</div>
+
+<div class="results">
+  <div class="result-card maintenance">
+    <div>
+      <div class="label">Maintenance</div>
+      <div class="sublabel">zero activity</div>
+    </div>
+    <div class="value">
+      <span id="maintVal">3035</span>
+      <span>cal</span>
+    </div>
+  </div>
+
+  <div class="result-card mild">
+    <div>
+      <div class="label">Mild Cut</div>
+      <div id="mildRate" class="loss-rate">
+        −0.5 lb/wk
+      </div>
+    </div>
+    <div class="value">
+      <span id="mildVal">2785</span>
+      <span>cal</span>
+    </div>
+  </div>
+
+  <div class="result-card moderate">
+    <div>
+      <div class="label">Moderate Cut</div>
+      <div id="modRate" class="loss-rate">
+        −1.0 lb/wk
+      </div>
+    </div>
+    <div class="value">
+      <span id="modVal">2535</span>
+      <span>cal</span>
+    </div>
+  </div>
+
+  <div class="result-card aggressive">
+    <div>
+      <div class="label">Aggressive Cut</div>
+      <div id="aggRate" class="loss-rate">
+        −2.0 lb/wk
+      </div>
+    </div>
+    <div class="value">
+      <span id="aggVal">2035</span>
+      <span>cal</span>
+    </div>
+  </div>
+</div>
+
+<div class="cardio-bonus" id="cardioBonus"
+  style="display:none;">
+  <div class="headline">Invisible Cardio Deficit</div>
+  <div class="extra">
+    +<span id="extraLoss">0</span>
+    <span>lb/wk extra loss</span>
+  </div>
+  <div class="note">
+    MacroFactor doesn't see this —
+    it's your hidden edge
+  </div>
+</div>
+
+<div class="formula">
+  <code>maintenance = 47 × weight − 5253</code>
+  <div class="note">
+    Derived from Oct '25 – Apr '26 bulk data,
+    zero cardio period
+  </div>
+</div>
+
+<script>
+const SLOPE = 47.4;
+const INTERCEPT = -5253;
+
+const slider = document.getElementById('weightSlider');
+const weightVal = document.getElementById('weightVal');
+const cardioInput = document.getElementById('cardioInput');
+const maintVal = document.getElementById('maintVal');
+const mildVal = document.getElementById('mildVal');
+const modVal = document.getElementById('modVal');
+const aggVal = document.getElementById('aggVal');
+const mildRate = document.getElementById('mildRate');
+const modRate = document.getElementById('modRate');
+const aggRate = document.getElementById('aggRate');
+const cardioBonus = document.getElementById('cardioBonus');
+const extraLoss = document.getElementById('extraLoss');
+
+function calc() {
+  const w = parseFloat(slider.value);
+  const cardio = parseInt(cardioInput.value) || 0;
+
+  const maint = Math.round(SLOPE * w + INTERCEPT);
+
+  // Deficit targets (from food alone)
+  const mild = maint - 250;
+  const mod = maint - 500;
+  const agg = maint - 1000;
+
+  // Total deficit = food deficit + cardio
+  // Loss rate = total deficit * 7 / 3500
+  const mildLoss = (250 + cardio) * 7 / 3500;
+  const modLoss = (500 + cardio) * 7 / 3500;
+  const aggLoss = (1000 + cardio) * 7 / 3500;
+
+  weightVal.textContent = w % 1 === 0
+    ? w.toFixed(0) : w.toFixed(1);
+  maintVal.textContent = maint;
+  mildVal.textContent = mild;
+  modVal.textContent = mod;
+  aggVal.textContent = agg;
+
+  mildRate.textContent =
+    '−' + mildLoss.toFixed(1) + ' lb/wk';
+  modRate.textContent =
+    '−' + modLoss.toFixed(1) + ' lb/wk';
+  aggRate.textContent =
+    '−' + aggLoss.toFixed(1) + ' lb/wk';
+
+  if (cardio > 0) {
+    const extra = cardio * 7 / 3500;
+    extraLoss.textContent = extra.toFixed(1);
+    cardioBonus.style.display = 'block';
+  } else {
+    cardioBonus.style.display = 'none';
+  }
+}
+
+slider.addEventListener('input', calc);
+cardioInput.addEventListener('input', calc);
+calc();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
