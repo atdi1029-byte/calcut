@@ -171,6 +171,16 @@ input[type="range"]::-webkit-slider-thumb {
   font-weight: 400;
   color: var(--dim);
 }
+.result-card .protein {
+  font-size: 13px;
+  color: var(--dim);
+  margin-top: 4px;
+  text-align: right;
+}
+.result-card .protein b {
+  color: var(--text);
+  font-weight: 600;
+}
 
 .result-card.maintenance { border-left: 4px solid var(--text); }
 .result-card.maintenance .value { color: var(--text); }
@@ -291,9 +301,12 @@ input[type="range"]::-webkit-slider-thumb {
       <div class="label">Maintenance</div>
       <div class="sublabel">zero activity</div>
     </div>
-    <div class="value">
-      <span id="maintVal">3035</span>
-      <span>cal</span>
+    <div>
+      <div class="value">
+        <span id="maintVal">3035</span>
+        <span>cal</span>
+      </div>
+      <div class="protein"><b id="maintProt">140</b>g protein</div>
     </div>
   </div>
 
@@ -304,9 +317,12 @@ input[type="range"]::-webkit-slider-thumb {
         −0.5 lb/wk
       </div>
     </div>
-    <div class="value">
-      <span id="mildVal">2785</span>
-      <span>cal</span>
+    <div>
+      <div class="value">
+        <span id="mildVal">2785</span>
+        <span>cal</span>
+      </div>
+      <div class="protein"><b id="mildProt">175</b>g protein</div>
     </div>
   </div>
 
@@ -317,9 +333,12 @@ input[type="range"]::-webkit-slider-thumb {
         −1.0 lb/wk
       </div>
     </div>
-    <div class="value">
-      <span id="modVal">2535</span>
-      <span>cal</span>
+    <div>
+      <div class="value">
+        <span id="modVal">2535</span>
+        <span>cal</span>
+      </div>
+      <div class="protein"><b id="modProt">193</b>g protein</div>
     </div>
   </div>
 
@@ -330,9 +349,12 @@ input[type="range"]::-webkit-slider-thumb {
         −2.0 lb/wk
       </div>
     </div>
-    <div class="value">
-      <span id="aggVal">2035</span>
-      <span>cal</span>
+    <div>
+      <div class="value">
+        <span id="aggVal">2035</span>
+        <span>cal</span>
+      </div>
+      <div class="protein"><b id="aggProt">210</b>g protein</div>
     </div>
   </div>
 </div>
@@ -374,6 +396,10 @@ const modRate = document.getElementById('modRate');
 const aggRate = document.getElementById('aggRate');
 const cardioBonus = document.getElementById('cardioBonus');
 const extraLoss = document.getElementById('extraLoss');
+const maintProt = document.getElementById('maintProt');
+const mildProt = document.getElementById('mildProt');
+const modProt = document.getElementById('modProt');
+const aggProt = document.getElementById('aggProt');
 
 function calc() {
   const w = parseFloat(slider.value);
@@ -391,6 +417,12 @@ function calc() {
   const mildLoss = (250 + cardio) * 7 / 3500;
   const modLoss = (500 + cardio) * 7 / 3500;
   const aggLoss = (1000 + cardio) * 7 / 3500;
+
+  // Protein: higher ratio for deeper cuts
+  maintProt.textContent = Math.round(w * 0.8);
+  mildProt.textContent = Math.round(w * 1.0);
+  modProt.textContent = Math.round(w * 1.1);
+  aggProt.textContent = Math.round(w * 1.2);
 
   weightVal.textContent = w % 1 === 0
     ? w.toFixed(0) : w.toFixed(1);
