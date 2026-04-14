@@ -401,8 +401,17 @@ const mildProt = document.getElementById('mildProt');
 const modProt = document.getElementById('modProt');
 const aggProt = document.getElementById('aggProt');
 
+// Restore saved values
+const savedW = localStorage.getItem('calcut_weight');
+const savedC = localStorage.getItem('calcut_cardio');
+if (savedW) { slider.value = savedW; }
+if (savedC) { cardioInput.value = savedC; }
+
 function calc() {
   const w = parseFloat(slider.value);
+  localStorage.setItem('calcut_weight', w);
+  localStorage.setItem('calcut_cardio',
+    cardioInput.value || '0');
   const cardio = parseInt(cardioInput.value) || 0;
 
   const maint = Math.round(SLOPE * w + INTERCEPT);
