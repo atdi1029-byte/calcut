@@ -246,6 +246,44 @@ input[type="range"]::-webkit-slider-thumb {
   opacity: 0.7;
 }
 
+.steps-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 400px;
+  text-align: center;
+}
+.steps-card .headline {
+  font-size: 13px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.steps-card .big-num {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.steps-card .big-num span {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--dim);
+}
+.steps-card .breakdown {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.8;
+}
+.steps-card .breakdown b {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .formula {
   text-align: center;
   margin: 24px auto;
@@ -372,6 +410,18 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
 </div>
 
+<div class="steps-card">
+  <div class="headline">Steps to Burn 1 Pound</div>
+  <div class="big-num">
+    <span id="stepsVal">72,000</span>
+    <span>steps</span>
+  </div>
+  <div class="breakdown">
+    <b id="stepsPerMile">~36</b> miles &middot;
+    <b id="calPerStep">0.049</b> cal/step
+  </div>
+</div>
+
 <div class="formula">
   <code>maintenance = 47 × weight − 5253</code>
   <div class="note">
@@ -396,6 +446,9 @@ const modRate = document.getElementById('modRate');
 const aggRate = document.getElementById('aggRate');
 const cardioBonus = document.getElementById('cardioBonus');
 const extraLoss = document.getElementById('extraLoss');
+const stepsVal = document.getElementById('stepsVal');
+const stepsPerMile = document.getElementById('stepsPerMile');
+const calPerStep = document.getElementById('calPerStep');
 const maintProt = document.getElementById('maintProt');
 const mildProt = document.getElementById('mildProt');
 const modProt = document.getElementById('modProt');
@@ -446,6 +499,16 @@ function calc() {
     '−' + modLoss.toFixed(1) + ' lb/wk';
   aggRate.textContent =
     '−' + aggLoss.toFixed(1) + ' lb/wk';
+
+  // Steps to burn 1 lb
+  // ~0.00028 cal per step per lb of body weight
+  const cps = w * 0.000275;
+  const stepsFor1lb = Math.round(3500 / cps);
+  const miles = (stepsFor1lb / 2000).toFixed(0);
+  stepsVal.textContent =
+    stepsFor1lb.toLocaleString();
+  stepsPerMile.textContent = '~' + miles;
+  calPerStep.textContent = cps.toFixed(3);
 
   if (cardio > 0) {
     const extra = cardio * 7 / 3500;
