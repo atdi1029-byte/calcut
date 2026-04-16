@@ -1,4 +1,4 @@
-const CACHE = 'calcut-v1';
+const CACHE = 'calcut-v2';
 const ASSETS = ['./', 'index.html', 'manifest.json'];
 
 self.addEventListener('install', e => {
