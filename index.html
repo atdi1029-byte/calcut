@@ -284,6 +284,50 @@ input[type="range"]::-webkit-slider-thumb {
   font-weight: 600;
 }
 
+.steps-burned {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 400px;
+  text-align: center;
+}
+.steps-burned .headline {
+  font-size: 13px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.steps-burned .big-num {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--green);
+  font-variant-numeric: tabular-nums;
+}
+.steps-burned .big-num span {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--dim);
+}
+.steps-burned .breakdown {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.8;
+}
+.steps-burned .breakdown b {
+  color: var(--text);
+  font-weight: 600;
+}
+.steps-burned .reset-note {
+  font-size: 11px;
+  color: var(--dim);
+  opacity: 0.6;
+  margin-top: 8px;
+}
+
 .formula {
   text-align: center;
   margin: 24px auto;
@@ -329,6 +373,15 @@ input[type="range"]::-webkit-slider-thumb {
         value="0" min="0" max="2000" step="50"
         placeholder="0">
       <span class="unit">cal / day</span>
+    </div>
+  </div>
+  <div class="input-group">
+    <label>Weekly Steps</label>
+    <div class="cardio-input">
+      <input type="number" id="stepsInput"
+        value="" min="0" max="500000" step="1000"
+        placeholder="0">
+      <span class="unit">steps / week</span>
     </div>
   </div>
 </div>
@@ -410,6 +463,22 @@ input[type="range"]::-webkit-slider-thumb {
   </div>
 </div>
 
+<div class="steps-burned" id="stepsBurned"
+  style="display:none;">
+  <div class="headline">Weekly Steps Burned</div>
+  <div class="big-num">
+    <span id="lbsBurned">0.00</span>
+    <span>lbs</span>
+  </div>
+  <div class="breakdown">
+    <b id="calsBurned">0</b> calories from
+    <b id="weeklyStepsDisplay">0</b> steps
+  </div>
+  <div class="reset-note" id="resetNote">
+    Resets Monday
+  </div>
+</div>
+
 <div class="steps-card">
   <div class="headline">Steps to Burn 1 Pound</div>
   <div class="big-num">
@@ -453,12 +522,39 @@ const maintProt = document.getElementById('maintProt');
 const mildProt = document.getElementById('mildProt');
 const modProt = document.getElementById('modProt');
 const aggProt = document.getElementById('aggProt');
+const stepsInput = document.getElementById('stepsInput');
+const stepsBurned = document.getElementById('stepsBurned');
+const lbsBurned = document.getElementById('lbsBurned');
+const calsBurned = document.getElementById('calsBurned');
+const weeklyStepsDisplay =
+  document.getElementById('weeklyStepsDisplay');
+const resetNote = document.getElementById('resetNote');
+
+// Monday reset check
+function getMonday(d) {
+  const dt = new Date(d);
+  const day = dt.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  dt.setHours(0, 0, 0, 0);
+  dt.setDate(dt.getDate() + diff);
+  return dt.getTime();
+}
+
+const thisMonday = getMonday(new Date());
+const savedMonday = parseInt(
+  localStorage.getItem('calcut_week_start') || '0');
+if (savedMonday < thisMonday) {
+  localStorage.setItem('calcut_steps', '');
+  localStorage.setItem('calcut_week_start', thisMonday);
+}
 
 // Restore saved values
 const savedW = localStorage.getItem('calcut_weight');
 const savedC = localStorage.getItem('calcut_cardio');
+const savedS = localStorage.getItem('calcut_steps');
 if (savedW) { slider.value = savedW; }
 if (savedC) { cardioInput.value = savedC; }
+if (savedS) { stepsInput.value = savedS; }
 
 function calc() {
   const w = parseFloat(slider.value);
@@ -517,10 +613,34 @@ function calc() {
   } else {
     cardioBonus.style.display = 'none';
   }
+
+  // Weekly steps burned
+  const wSteps = parseInt(stepsInput.value) || 0;
+  localStorage.setItem('calcut_steps', wSteps || '');
+  if (wSteps > 0) {
+    const totalCals = Math.round(wSteps * cps);
+    const lbs = totalCals / 3500;
+    lbsBurned.textContent = lbs.toFixed(2);
+    calsBurned.textContent = totalCals.toLocaleString();
+    weeklyStepsDisplay.textContent =
+      wSteps.toLocaleString();
+    // Show days until reset
+    const now = new Date();
+    const day = now.getDay();
+    const daysLeft = day === 1 ? 7
+      : day === 0 ? 1 : 8 - day;
+    resetNote.textContent = daysLeft === 1
+      ? 'Resets tomorrow'
+      : 'Resets in ' + daysLeft + ' days';
+    stepsBurned.style.display = 'block';
+  } else {
+    stepsBurned.style.display = 'none';
+  }
 }
 
 slider.addEventListener('input', calc);
 cardioInput.addEventListener('input', calc);
+stepsInput.addEventListener('input', calc);
 calc();
 
 if ('serviceWorker' in navigator) {
