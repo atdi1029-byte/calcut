@@ -376,12 +376,12 @@ input[type="range"]::-webkit-slider-thumb {
     </div>
   </div>
   <div class="input-group">
-    <label>Weekly Steps</label>
+    <label>Today's Steps</label>
     <div class="cardio-input">
       <input type="number" id="stepsInput"
-        value="" min="0" max="500000" step="1000"
+        value="" min="0" max="100000" step="100"
         placeholder="0">
-      <span class="unit">steps / week</span>
+      <span class="unit">steps today</span>
     </div>
   </div>
 </div>
@@ -530,31 +530,56 @@ const weeklyStepsDisplay =
   document.getElementById('weeklyStepsDisplay');
 const resetNote = document.getElementById('resetNote');
 
-// Monday reset check
-function getMonday(d) {
+// Date helpers
+function toDateStr(d) {
+  return d.toISOString().slice(0, 10);
+}
+function getMondayDate(d) {
   const dt = new Date(d);
   const day = dt.getDay();
   const diff = day === 0 ? -6 : 1 - day;
-  dt.setHours(0, 0, 0, 0);
   dt.setDate(dt.getDate() + diff);
-  return dt.getTime();
+  return dt;
 }
+function getWeekDates() {
+  const mon = getMondayDate(new Date());
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    dates.push(toDateStr(d));
+  }
+  return dates;
+}
+const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const today = toDateStr(new Date());
 
-const thisMonday = getMonday(new Date());
-const savedMonday = parseInt(
-  localStorage.getItem('calcut_week_start') || '0');
-if (savedMonday < thisMonday) {
-  localStorage.setItem('calcut_steps', '');
-  localStorage.setItem('calcut_week_start', thisMonday);
+function saveDaySteps(dateStr, val) {
+  localStorage.setItem('calcut_day_' + dateStr, val);
+}
+function getDaySteps(dateStr) {
+  return parseInt(
+    localStorage.getItem('calcut_day_' + dateStr)) || 0;
+}
+function getWeekSteps() {
+  const dates = getWeekDates();
+  let total = 0;
+  const daily = [];
+  dates.forEach((d, i) => {
+    const s = getDaySteps(d);
+    total += s;
+    if (s > 0) daily.push({ day: dayNames[i], steps: s });
+  });
+  return { total, daily };
 }
 
 // Restore saved values
 const savedW = localStorage.getItem('calcut_weight');
 const savedC = localStorage.getItem('calcut_cardio');
-const savedS = localStorage.getItem('calcut_steps');
+const savedToday = getDaySteps(today);
 if (savedW) { slider.value = savedW; }
 if (savedC) { cardioInput.value = savedC; }
-if (savedS) { stepsInput.value = savedS; }
+if (savedToday) { stepsInput.value = savedToday; }
 
 function calc() {
   const w = parseFloat(slider.value);
@@ -614,24 +639,21 @@ function calc() {
     cardioBonus.style.display = 'none';
   }
 
-  // Weekly steps burned
-  const wSteps = parseInt(stepsInput.value) || 0;
-  localStorage.setItem('calcut_steps', wSteps || '');
-  if (wSteps > 0) {
-    const totalCals = Math.round(wSteps * cps);
+  // Save today's steps and compute weekly total
+  const todaySteps = parseInt(stepsInput.value) || 0;
+  saveDaySteps(today, todaySteps);
+  const week = getWeekSteps();
+  if (week.total > 0) {
+    const totalCals = Math.round(week.total * cps);
     const lbs = totalCals / 3500;
     lbsBurned.textContent = lbs.toFixed(2);
     calsBurned.textContent = totalCals.toLocaleString();
     weeklyStepsDisplay.textContent =
-      wSteps.toLocaleString();
-    // Show days until reset
-    const now = new Date();
-    const day = now.getDay();
-    const daysLeft = day === 1 ? 7
-      : day === 0 ? 1 : 8 - day;
-    resetNote.textContent = daysLeft === 1
-      ? 'Resets tomorrow'
-      : 'Resets in ' + daysLeft + ' days';
+      week.total.toLocaleString();
+    // Daily breakdown
+    const parts = week.daily.map(
+      d => d.day + ': ' + d.steps.toLocaleString());
+    resetNote.textContent = parts.join(' · ');
     stepsBurned.style.display = 'block';
   } else {
     stepsBurned.style.display = 'none';
